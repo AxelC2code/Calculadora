@@ -272,7 +272,7 @@ namespace CalculadoraProject
 
         private void ObtenerValorUnario(string operadorTexto)
         {
-            valor2 = Convert.ToDouble(cajaResultado.Text); // Usamos valor2 para operaciones unarias
+            valor2 = Convert.ToDouble(cajaResultado.Text); 
             lblHistorial.Text = operadorTexto + cajaResultado.Text + ")";
             cajaResultado.Text = "0";
             // Ejecutamos inmediatamente pues son operaciones unarias
