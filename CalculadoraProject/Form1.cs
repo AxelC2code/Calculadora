@@ -68,21 +68,48 @@ namespace CalculadoraProject
          }
          */
 
+        // Metodo para preparar la primera operacion (valor 1)
+        private void ObtenerValor(string operador)
+        {
+            valor1 = Convert.ToDouble(cajaResultado.Text);
+            lblHistorial.Text = cajaResultado.Text + operador;
+            cajaResultado.Text = "0";   // Se limpia la caja y se prepara para el segundo valor
+        }
+
+        private void ObtenerValorUnario(string operadorTexto)
+        {
+            valor2 = Convert.ToDouble(cajaResultado.Text);
+            lblHistorial.Text = operadorTexto + cajaResultado.Text + ")";
+            cajaResultado.Text = "0";
+            // Ejecutamos inmediatamente pues son operaciones unarias
+            double resultado = EjecutarOperacion();
+            cajaResultado.Text = Convert.ToString(resultado);
+            unNumeroLeido = false;
+            valor1 = 0;
+            valor2 = 0;
+        }
+
         private double EjecutarOperacion()
         {
             double resultado = 0;
+
             switch (operador)
             {
                 case Operacion.Suma:
                     resultado = valor1 + valor2;
                     break;
+
                 case Operacion.Resta:
                     resultado = valor1 - valor2;
                     break;
+
+                case Operacion.Multiplicacion:
+                    resultado = valor1 * valor2;
+                    break;
+
                 case Operacion.Division:
                     if (valor2 == 0)
                     {
-                        
                         lblHistorial.Text = "No se puede dividir entre 0";
                         resultado = 0;
                     }
@@ -91,13 +118,48 @@ namespace CalculadoraProject
                         resultado = valor1 / valor2;
                     }
                     break;
-                case Operacion.Multiplicacion:
-                    resultado = valor1 * valor2;
+
+                case Operacion.Exponente:
+                    resultado = Math.Pow(valor1, valor2);
                     break;
+                    // Evitar 0^0 (indeterminado)
+                    if (valor1 == 0 && valor2 == 0)
+                    {
+                        lblHistorial.Text = "0^0 indeterminado";
+                        resultado = 0;
+                    }
+                    // Base negativa con exponente no entero → resultado complejo
+                    else if (valor1 < 0 && valor2 % 1 != 0)
+                    {
+                        lblHistorial.Text = "Exponente no entero en base negativa";
+                        resultado = 0;
+                    }
+                    else
+                    {
+                        resultado = Math.Pow(valor1, valor2);
+                    }
+                    break;
+
+                case Operacion.Modulo:
+                    resultado = valor1 % valor2;
+                    break;
+
+                    // El divisor (valor2) no puede ser cero
+                    if (valor2 == 0)
+                    {
+                        lblHistorial.Text = "Módulo por cero no permitido";
+                        resultado = 0;
+                    }
+                    else
+                    {
+                        resultado = valor1 % valor2;
+                    }
+                    break;
+
                 case Operacion.Logaritmo:
                     if (valor1 <= 0 || valor1 == 1 || valor2 <= 0)
                     {
-                        lblHistorial.Text = "Base/arg. log inválido";
+                        lblHistorial.Text = "Base/arg.log inválido";
                         resultado = 0;
                     }
                     else
@@ -105,6 +167,7 @@ namespace CalculadoraProject
                         resultado = Math.Log(valor2, valor1); 
                     }
                     break;
+
                 case Operacion.Raiz:
                     if (valor1 == 0)
                     {
@@ -121,19 +184,13 @@ namespace CalculadoraProject
                         resultado = Math.Pow(valor2, 1.0 / valor1); 
                     }
                     break;
-                case Operacion.Exponente:
-                    resultado = Math.Pow(valor1, valor2); 
-                    break;
-
-                case Operacion.Modulo:
-                    resultado = valor1 % valor2;
-                    break;
 
                 // Operaciones unarias
                 // Coonversion a radianes de cada funcncion
                 case Operacion.Seno:
                     resultado = Math.Sin(valor2 * Math.PI / 180);
                     break;
+
                 case Operacion.Coseno:
                     resultado = Math.Cos(valor2 * Math.PI / 180);
                     break;
@@ -158,63 +215,93 @@ namespace CalculadoraProject
             {
                 cajaResultado.Text += "0";
             }
-            
         }
 
         // Método para leer el número 1 al 9 y mostrarlo en la caja de resultado
-        private void btnUno_Click(object sender, EventArgs e)
+        private void btnUno_Click(object sender, EventArgs e) => LeerNumero("1");
+        private void btnDos_Click(object sender, EventArgs e) => LeerNumero("2");
+        private void btnTres_Click(object sender, EventArgs e) => LeerNumero("3");
+        private void btnCuatro_Click(object sender, EventArgs e) => LeerNumero("4");
+        private void btnCinco_Click(object sender, EventArgs e) => LeerNumero("5");
+        private void btnSeis_Click(object sender, EventArgs e) => LeerNumero("6");
+        private void btnSiete_Click(object sender, EventArgs e) => LeerNumero("7");
+        private void btnOcho_Click(object sender, EventArgs e) => LeerNumero("8");
+        private void btnNueve_Click(object sender, EventArgs e) => LeerNumero("9");
+
+        private void btnPunto_Click(object sender, EventArgs e)
         {
-            LeerNumero("1");
+            if (cajaResultado.Text.Contains("."))
+            {
+                return;
+            }
+            cajaResultado.Text += ".";
         }
 
-        private void btnDos_Click(object sender, EventArgs e)
+        private void btnSuma_Click(object sender, EventArgs e)
         {
-            LeerNumero("2");
+            operador = Operacion.Suma;
+            ObtenerValor(" + ");
         }
 
-        private void btnTres_Click(object sender, EventArgs e)
+        private void btnResta_Click(object sender, EventArgs e)
         {
-            LeerNumero("3");
+            operador = Operacion.Resta;
+            ObtenerValor(" - ");
         }
 
-        private void btnCuatro_Click(object sender, EventArgs e)
+        private void btnMultiplicar_Click(object sender, EventArgs e)
         {
-            LeerNumero("4");
+            operador = Operacion.Multiplicacion;
+            ObtenerValor(" x ");
         }
 
-        private void btnCinco_Click(object sender, EventArgs e)
+        private void btnDivision_Click(object sender, EventArgs e)
         {
-            LeerNumero("5");
+            operador = Operacion.Division;
+            ObtenerValor(" ÷ ");
         }
 
-        private void btnSeis_Click(object sender, EventArgs e)
+        private void btnExp_Click(object sender, EventArgs e)
         {
-            LeerNumero("6");
+            operador = Operacion.Exponente;
+            ObtenerValor("^");
         }
 
-        private void btnSiete_Click(object sender, EventArgs e)
+        private void btnModulo_Click(object sender, EventArgs e)
         {
-            LeerNumero("7");
+            operador = Operacion.Modulo;
+            ObtenerValor(" % ");
         }
 
-        private void btnOcho_Click(object sender, EventArgs e)
+        private void btnLog_Click(object sender, EventArgs e)
         {
-            LeerNumero("8");
+            operador = Operacion.Logaritmo;
+            ObtenerValor("log base ");
         }
 
-        private void btnNueve_Click(object sender, EventArgs e)
+        private void btnRaiz_Click(object sender, EventArgs e)
         {
-            LeerNumero("9");
+            operador = Operacion.Raiz;
+            ObtenerValor("raíz ");
         }
 
-        // Metodo para preparar la primera operacion (valor 1)
-        private void ObtenerValor(string operador)
+        private void btnSen_Click(object sender, EventArgs e)
         {
-            valor1 = Convert.ToDouble(cajaResultado.Text);
-            lblHistorial.Text = cajaResultado.Text + operador;
-            cajaResultado.Text = "0";   // Se limpia la caja y se prepara para el segundo valor
+            operador = Operacion.Seno;
+            ObtenerValorUnario("sin(");
         }
-        
+
+        private void btnCos_Click(object sender, EventArgs e)
+        {
+            operador = Operacion.Coseno;
+            ObtenerValorUnario("cos(");
+        }
+
+        private void btnTan_Click(object sender, EventArgs e)
+        {
+            operador = Operacion.Tangente;
+            ObtenerValorUnario("tan(");
+        }
 
         private void btnResultado_Click(object sender, EventArgs e)
         {
@@ -268,94 +355,6 @@ namespace CalculadoraProject
             {
                 cajaResultado.Text = "0";
             }
-        }
-
-        private void ObtenerValorUnario(string operadorTexto)
-        {
-            valor2 = Convert.ToDouble(cajaResultado.Text); 
-            lblHistorial.Text = operadorTexto + cajaResultado.Text + ")";
-            cajaResultado.Text = "0";
-            // Ejecutamos inmediatamente pues son operaciones unarias
-            double resultado = EjecutarOperacion();
-            cajaResultado.Text = Convert.ToString(resultado);
-            unNumeroLeido = false;
-            valor1 = 0;
-            valor2 = 0;
-        }
-
-        private void btnPunto_Click(object sender, EventArgs e)
-        {
-            if (cajaResultado.Text.Contains("."))
-            {
-                return;
-            }
-            cajaResultado.Text += ".";
-        }
-
-        private void btnSuma_Click(object sender, EventArgs e)
-        {
-            operador = Operacion.Suma;
-            ObtenerValor(" + ");
-        }
-
-        private void btnResta_Click(object sender, EventArgs e)
-        {
-            operador = Operacion.Resta;
-            ObtenerValor(" - ");
-        }
-
-        private void btnMultiplicar_Click(object sender, EventArgs e)
-        {
-            operador = Operacion.Multiplicacion;
-            ObtenerValor(" x ");
-        }
-
-        private void btnDivision_Click(object sender, EventArgs e)
-        {
-            operador = Operacion.Division;
-            ObtenerValor(" ÷ ");
-        }
-
-        private void btnSen_Click(object sender, EventArgs e)
-        {
-            operador = Operacion.Seno;
-            ObtenerValorUnario("sin(");
-        }
-
-        private void btnCos_Click(object sender, EventArgs e)
-        {
-            operador = Operacion.Coseno;
-            ObtenerValorUnario("cos(");
-        }
-
-        private void btnTan_Click(object sender, EventArgs e)
-        {
-            operador = Operacion.Tangente;
-            ObtenerValorUnario("tan(");
-        }
-
-        private void btnLog_Click(object sender, EventArgs e)
-        {
-            operador = Operacion.Logaritmo;
-            ObtenerValor("log base ");
-        }
-
-        private void btnRaiz_Click(object sender, EventArgs e)
-        {
-            operador = Operacion.Raiz;
-            ObtenerValor("raíz ");
-        }
-
-        private void btnExp_Click(object sender, EventArgs e)
-        {
-            operador = Operacion.Exponente;
-            ObtenerValor("^");
-        }
-
-        private void btnModulo_Click(object sender, EventArgs e)
-        {
-            operador = Operacion.Modulo;
-            ObtenerValor(" % ");
-        }
+        } 
     }
 }
