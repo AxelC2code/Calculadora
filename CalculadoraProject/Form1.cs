@@ -120,9 +120,8 @@ namespace CalculadoraProject
                     break;
 
                 case Operacion.Exponente:
-                    resultado = Math.Pow(valor1, valor2);
-                    break;
-                    // Evitar 0^0 (indeterminado)
+
+                    // Exponente con base 0 y exponente 0 → indeterminado
                     if (valor1 == 0 && valor2 == 0)
                     {
                         lblHistorial.Text = "0^0 indeterminado";
@@ -141,10 +140,6 @@ namespace CalculadoraProject
                     break;
 
                 case Operacion.Modulo:
-                    resultado = valor1 % valor2;
-                    break;
-
-                    // El divisor (valor2) no puede ser cero
                     if (valor2 == 0)
                     {
                         lblHistorial.Text = "Módulo por cero no permitido";
